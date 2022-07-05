@@ -2,78 +2,90 @@
 
 var startlat = 40.75637123;
 var startlon = -73.98545321;
-
-let get_location = () => {
-  navigator.geolocation.getCurrentPosition(function (position) {
-    let currlat = position.coords.latitude;
-    let currlong = position.coords.longitude;
-    if (currlat != null && currlong != null) {
-      startlat = currlat;
-      startlon = currlong;
-    }
-  });
-};
-
-console.log(startlat, " ", startlon);
-get_location();
-console.log(startlat, " ", startlon);
 let options = {
   center: [startlat, startlon],
   zoom: 9,
 };
+const map = L.map("map", options);
 
-// document.querySelector(".lat").innerText = startlat;
-// document.querySelector(".lon").innerText = startlon;
+let button = document.querySelector(".button");
+let nzoom = 12;
 
-// // const map = L.map("map").setView([51.505, -0.09], 13);
-// const map = L.map("map", options);
+document.querySelector(".lat").innerText = startlat;
+document.querySelector(".lon").innerText = startlon;
 
-// L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-//   maxZoom: 19,
-//   attribution: "© OpenStreetMap",
-// }).addTo(map);
+// Event listeners ---------------------------------------------------------------------
 
-// let nzoom = 12;
+button.addEventListener("click", (e) => {
+  navigator.geolocation.getCurrentPosition(success, fail);
+});
 
-// let myMarker = L.marker([startlat, startlon], {
-//   title: "Coordinates",
-//   alt: "Coordinates",
-//   draggable: true,
-// })
-//   .addTo(map)
-//   .on("dragend", function () {
-//     let lat = myMarker.getLatLng().lat.toFixed(8);
-//     let lon = myMarker.getLatLng().lng.toFixed(8);
-//     console.log(lat);
-//     console.log(lon);
+map.on("click", (e) => {
+  let lat = e.latlng.lat.toFixed(8);
+  let lon = e.latlng.lng.toFixed(8);
 
-//     document.querySelector(".lat").innerText = lat;
-//     document.querySelector(".lon").innerText = lon;
-//     latlongSearch(lat, lon);
-//   });
+  myMarker.setLatLng([lat, lon]);
+  map.setView([lat, lon], 9);
 
-// map.on("click", (e) => {
-//   let lat = e.latlng.lat.toFixed(8);
-//   let long = e.latlng.lng.toFixed(8);
-//   let hash = geohash.encode(lat, long);
-//   let rev = geohash.decode(hash);
+  setData(lat, lon);
+});
 
-//   let kujshit = geohash.neighbors(hash);
-//   console.log(kujshit);
+// Map ---------------------------------------------------------------------------------
 
-//   myMarker.setLatLng([lat, long]);
-//   map.setView([lat, long], 9);
-//   // latlongSearch(lat, long);
-//   elements = [];
-//   for (let step = 1; step <= 8; step++) {
-//     elements.push(
-//       (document.querySelector(".hash" + step).innerText = kojshit[step - 1])
-//     );
-//   }
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+  attribution: "© OpenStreetMap",
+}).addTo(map);
 
-//   document.querySelector(".lat").innerText = lat;
-//   document.querySelector(".lon").innerText = long;
-//   document.querySelector(".hash0").innerText = hash;
-//   document.querySelector(".lat2").innerText = rev.latitude;
-//   document.querySelector(".lon2").innerText = rev.longitude;
-// });
+let myMarker = L.marker([startlat, startlon], {
+  title: "Coordinates",
+  alt: "Coordinates",
+  draggable: true,
+})
+  .addTo(map)
+  .on("dragend", function () {
+    let lat = myMarker.getLatLng().lat.toFixed(8);
+    let lon = myMarker.getLatLng().lng.toFixed(8);
+  });
+
+// IP location response ----------------------------------------------------------------
+
+let success = (location) => {
+  let coords = location.coords;
+
+  startlat = coords.latitude;
+  startlon = coords.longitude;
+
+  myMarker.setLatLng([startlat, startlon]);
+  map.setView([startlat, startlon], 9);
+
+  // map.flyTo(new L.LatLng(startlat, startlon));
+  // map.setView(new L.LatLng(startlat, startlon));
+
+  setData(startlat, startlon);
+};
+
+let fail = (location) => {
+  console.log(location.coords);
+};
+
+// Utility -----------------------------------------------------------------------------
+
+let setData = (lat, lon) => {
+  let hash = geohash.encode(lat, lon);
+  let rev = geohash.decode(hash);
+  let kujshit = geohash.neighbors(hash);
+
+  document.querySelector(".lat").innerText = lat;
+  document.querySelector(".lon").innerText = lon;
+  document.querySelector(".hash0").innerText = hash;
+  document.querySelector(".lat2").innerText = rev.latitude;
+  document.querySelector(".lon2").innerText = rev.longitude;
+
+  let elements = [];
+  for (let step = 1; step <= 8; step++) {
+    elements.push(
+      (document.querySelector(".hash" + step).innerText = kujshit[step - 1])
+    );
+  }
+};

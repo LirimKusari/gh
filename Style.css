@@ -78,3 +78,15 @@
 .custom-map-control-button:hover {
   background: rgb(235, 235, 235);
 }
+
+.button {
+  width: 15rem;
+  height: 4rem;
+  border-radius: 8px;
+  border: none;
+  background: palevioletred;
+  margin-bottom: 2rem;
+}
+.button:hover {
+  background: violet;
+}
